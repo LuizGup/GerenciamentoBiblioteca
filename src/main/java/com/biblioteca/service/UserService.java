@@ -3,7 +3,6 @@ package com.biblioteca.service;
 import com.biblioteca.entity.User;
 import com.biblioteca.entity.UserStatus;
 import com.biblioteca.repository.UserRepository;
-import com.biblioteca.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +37,7 @@ public class UserService {
         User existingUser = getUserById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
+        existingUser.setStatus(user.getStatus());
 
         return userRepository.save(existingUser);
     }
