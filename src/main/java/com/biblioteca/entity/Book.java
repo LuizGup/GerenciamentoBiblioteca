@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 @Data
@@ -15,6 +17,7 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "O campo titulo não pode ser nulo")
     @Column(nullable = false)
     private String title;
 
