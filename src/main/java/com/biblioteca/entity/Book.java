@@ -3,6 +3,9 @@ package com.biblioteca.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import java.util.List;
 
 @Data
 @Entity
@@ -32,4 +35,9 @@ public class Book {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BookStatus status;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Loan> loans;
 }
