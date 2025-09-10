@@ -39,7 +39,7 @@ public class BookService {
 
     @Transactional
     public Book updateBook(Long id, Book book) {
-        Book existingBook = findBookById(id).orElseThrow(() -> new ResourceNotFoundException("Book not found"));
+        Book existingBook = findBookById(id).orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
             existingBook.setTitle(book.getTitle());
             existingBook.setAuthor(book.getAuthor());
             existingBook.setPublicationYear(book.getPublicationYear());
