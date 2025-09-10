@@ -50,7 +50,7 @@ public class BookService {
             } else {
                 existingBook.setStatus(BookStatus.INDISPONIVEL);
             }
-            return bookRepository.save(book);
+            return bookRepository.save(existingBook);
     }
 
     @Transactional
