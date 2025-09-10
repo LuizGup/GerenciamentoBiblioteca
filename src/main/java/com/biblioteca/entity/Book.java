@@ -2,6 +2,7 @@
 package com.biblioteca.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -17,10 +18,12 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "O campo titulo não pode ser nulo")
+    @NotNull(message = "O campo title não pode ser nulo")
+    @Size(min = 2, max = 100, message = "O título deve ter entre 2 e 100 caracteres.")
     @Column(nullable = false)
     private String title;
 
+    @NotNull(message = "O campo author não pode ser nulo")
     @Column(nullable = false)
     private String author;
 
