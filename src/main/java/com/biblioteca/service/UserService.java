@@ -1,15 +1,13 @@
 package com.biblioteca.service;
 
-import com.biblioteca.entity.User;
-import com.biblioteca.entity.UserStatus;
+import com.biblioteca.entity.Users;
 import com.biblioteca.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.biblioteca.exception.ResourceNotFoundException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,23 +16,23 @@ public class UserService {
     private UserRepository userRepository;
 
     @Transactional
-    public User createUser(User user) {
+    public Users createUser(Users user) {
         return userRepository.save(user);
     }
 
     @Transactional(readOnly = true)
-    public Page<User> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
+    public List<Users> findAllUsers() {
+        return userRepository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserById(Long id) {
+    public Optional<Users> findUserById(Long id) {
         return userRepository.findById(id);
     }
 
     @Transactional
-    public User updateUser(Long id, User user) {
-        User existingUser = getUserById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    public Users updateUser(Long id, Users user) {
+        Users existingUser = findUserById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
         existingUser.setStatus(user.getStatus());
