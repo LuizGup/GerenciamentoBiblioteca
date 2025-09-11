@@ -4,12 +4,11 @@ import com.biblioteca.entity.Book;
 import com.biblioteca.entity.BookStatus;
 import com.biblioteca.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.biblioteca.exception.ResourceNotFoundException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,8 +32,8 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Book> findAllBooks(Pageable pageable) {
-        return bookRepository.findAll(pageable);
+    public List<Book> findAllBooks() {
+        return bookRepository.findAll();
     }
 
     @Transactional
