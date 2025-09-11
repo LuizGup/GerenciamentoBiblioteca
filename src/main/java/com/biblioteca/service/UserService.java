@@ -23,18 +23,18 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Page<User> getAllUsers(Pageable pageable) {
+    public Page<User> findAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserById(Long id) {
+    public Optional<User> findUserById(Long id) {
         return userRepository.findById(id);
     }
 
     @Transactional
     public User updateUser(Long id, User user) {
-        User existingUser = getUserById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User existingUser = findUserById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
         existingUser.setStatus(user.getStatus());
