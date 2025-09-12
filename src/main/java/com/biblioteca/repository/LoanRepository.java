@@ -1,4 +1,3 @@
-// src/main/java/com/biblioteca/repository/BookRepository.java
 package com.biblioteca.repository;
 
 import com.biblioteca.entity.Loan;
@@ -7,11 +6,19 @@ import com.biblioteca.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface LoanRepository extends JpaRepository<Loan, Long> {
-    List<Loan> findByUserAndStatus(Users user, LoanStatus status);
-    List<Loan> findByExpectedReturnDateBeforeAndStatus(LocalDate today, LoanStatus status);
+
+    /**
+     * Novo método para contar empréstimos ativos de um usuário.
+     * Essencial para a regra de negócio de limite de empréstimos.
+     */
+    int countByUserAndStatus(Users user, LoanStatus status);
+
+    /**
+     * Novo método para buscar todos os empréstimos de um usuário específico.
+     */
+    List<Loan> findByUserId(Long userId);
 }
