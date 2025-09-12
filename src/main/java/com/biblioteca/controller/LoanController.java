@@ -2,30 +2,22 @@ package com.biblioteca.controller;
 
 import com.biblioteca.dto.LoanRequestDTO;
 import com.biblioteca.entity.Loan;
+import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.service.LoanService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/loans")
 public class LoanController {
-
-    // Simple error response DTO
-    public static class ErrorResponse {
-        private String message;
-        public ErrorResponse(String message) {
-            this.message = message;
-        }
-        public String getMessage() {
-            return message;
-        }
-        public void setMessage(String message) {
-            this.message = message;
-        }
-    }
 
     @Autowired
     private LoanService loanService;
@@ -35,9 +27,22 @@ public class LoanController {
         try {
             Loan newLoan = loanService.createLoan(loanRequest);
             return new ResponseEntity<>(newLoan, HttpStatus.CREATED);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        } catch (IllegalStateException | ResourceNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<Loan>> getAllLoans(
+            @PageableDefault(page = 0, size = 10, sort = "loanDate") Pageable pageable) {
+        Page<Loan> loans = loanService.findAllLoans(pageable);
+        return ResponseEntity.ok(loans);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Loan>> getLoansByUserId(@PathVariable Long userId) {
+        List<Loan> loans = loanService.findLoansByUserId(userId);
+        return ResponseEntity.ok(loans);
     }
 
     @PatchMapping("/{id}/return")
@@ -45,8 +50,8 @@ public class LoanController {
         try {
             Loan returnedLoan = loanService.returnLoan(id);
             return ResponseEntity.ok(returnedLoan);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        } catch (IllegalStateException | ResourceNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
