@@ -13,26 +13,40 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/loans")
 public class LoanController {
 
+    // Simple error response DTO
+    public static class ErrorResponse {
+        private String message;
+        public ErrorResponse(String message) {
+            this.message = message;
+        }
+        public String getMessage() {
+            return message;
+        }
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+
     @Autowired
     private LoanService loanService;
 
     @PostMapping
-    public ResponseEntity<Loan> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
+    public ResponseEntity<?> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
         try {
             Loan newLoan = loanService.createLoan(loanRequest);
             return new ResponseEntity<>(newLoan, HttpStatus.CREATED);
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
     @PatchMapping("/{id}/return")
-    public ResponseEntity<Loan> returnLoan(@PathVariable Long id) {
+    public ResponseEntity<?> returnLoan(@PathVariable Long id) {
         try {
             Loan returnedLoan = loanService.returnLoan(id);
             return ResponseEntity.ok(returnedLoan);
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 }
