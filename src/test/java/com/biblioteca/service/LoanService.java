@@ -6,94 +6,129 @@ import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.BookRepository;
 import com.biblioteca.repository.LoanRepository;
 import com.biblioteca.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Optional;
 
-@Service
-public class LoanService {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-    private static final int LOAN_PERIOD_DAYS = 14;
+@ExtendWith(MockitoExtension.class)
+class LoanServiceTest {
 
-    @Autowired
+    @InjectMocks
+    private LoanService loanService;
+
+    @Mock
     private LoanRepository loanRepository;
-    @Autowired
+    @Mock
     private UserRepository userRepository;
-    @Autowired
+    @Mock
     private BookRepository bookRepository;
 
-    @Transactional
-    public Loan createLoan(LoanRequestDTO loanRequest) {
-        Users user = userRepository.findById(loanRequest.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com ID: " + loanRequest.getUserId()));
+    private Users activeUser;
+    private Book availableBook;
+    private LoanRequestDTO loanRequestDTO;
 
-        Book book = bookRepository.findById(loanRequest.getBookId())
-                .orElseThrow(() -> new ResourceNotFoundException("Livro não encontrado com ID: " + loanRequest.getBookId()));
+    @BeforeEach
+    void setUp() {
+        activeUser = new Users();
+        activeUser.setId(1L);
+        activeUser.setStatus(UserStatus.ATIVO);
 
-        if (user.getStatus() != UserStatus.ATIVO) {
-            throw new IllegalStateException("Usuário não está ativo e não pode realizar empréstimos.");
-        }
-        if (book.getStatus() != BookStatus.DISPONIVEL || book.getAvailableQuantity() <= 0) {
-            throw new IllegalStateException("Livro não está disponível para empréstimo.");
-        }
-        int activeLoansCount = loanRepository.countByUserAndStatus(user, LoanStatus.ATIVO);
-        if (activeLoansCount >= 3) {
-            throw new IllegalStateException("Usuário já possui 3 empréstimos ativos. Limite excedido.");
-        }
+        availableBook = new Book();
+        availableBook.setId(1L);
+        availableBook.setStatus(BookStatus.DISPONIVEL);
+        availableBook.setAvailableQuantity(5);
 
-        book.setAvailableQuantity(book.getAvailableQuantity() - 1);
-        if (book.getAvailableQuantity() == 0) {
-            book.setStatus(BookStatus.INDISPONIVEL);
-        }
-        bookRepository.save(book);
-
-        Loan newLoan = new Loan();
-        newLoan.setUser(user);
-        newLoan.setBook(book);
-        newLoan.setLoanDate(LocalDate.now());
-        newLoan.setExpectedReturnDate(LocalDate.now().plusDays(LOAN_PERIOD_DAYS));
-        newLoan.setStatus(LoanStatus.ATIVO);
-
-        return loanRepository.save(newLoan);
+        loanRequestDTO = new LoanRequestDTO();
+        loanRequestDTO.setUserId(1L);
+        loanRequestDTO.setBookId(1L);
     }
 
-    @Transactional
-    public Loan returnLoan(Long loanId) {
-        Loan loan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new ResourceNotFoundException("Empréstimo não encontrado com ID: " + loanId));
+    @Test
+    @DisplayName("Deve criar um empréstimo com sucesso quando todas as regras são atendidas")
+    void createLoan_Success() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
+        when(loanRepository.countByUserAndStatus(activeUser, LoanStatus.ATIVO)).thenReturn(0);
+        when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        if (loan.getStatus() == LoanStatus.DEVOLVIDO) {
-            throw new IllegalStateException("Este empréstimo já foi devolvido.");
-        }
 
-        Book book = loan.getBook();
-        book.setAvailableQuantity(book.getAvailableQuantity() + 1);
-        if (book.getStatus() == BookStatus.INDISPONIVEL) {
-            book.setStatus(BookStatus.DISPONIVEL);
-        }
-        bookRepository.save(book);
+        Loan createdLoan = loanService.createLoan(loanRequestDTO);
 
-        loan.setReturnDate(LocalDate.now());
-        loan.setStatus(LoanStatus.DEVOLVIDO);
+        assertNotNull(createdLoan);
+        assertEquals(LoanStatus.ATIVO, createdLoan.getStatus());
+        assertEquals(activeUser, createdLoan.getUser());
+        assertEquals(availableBook, createdLoan.getBook());
+        assertEquals(4, availableBook.getAvailableQuantity());
 
-        return loanRepository.save(loan);
+        verify(bookRepository, times(1)).save(availableBook);
+        verify(loanRepository, times(1)).save(any(Loan.class));
     }
 
-    @Transactional(readOnly = true)
-    public Page<Loan> findAllLoans(Pageable pageable) {
-        return loanRepository.findAll(pageable);
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar criar empréstimo com livro indisponível")
+    void createLoan_WhenBookIsNotAvailable_ShouldThrowException() {
+        availableBook.setStatus(BookStatus.INDISPONIVEL);
+        availableBook.setAvailableQuantity(0);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            loanService.createLoan(loanRequestDTO);
+        });
+
+        assertEquals("Livro não está disponível para empréstimo.", exception.getMessage());
+        verify(loanRepository, never()).save(any(Loan.class));
     }
 
-    @Transactional(readOnly = true)
-    public List<Loan> findLoansByUserId(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new ResourceNotFoundException("Usuário não encontrado com ID: " + userId);
-        }
-        return loanRepository.findByUserId(userId);
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar criar empréstimo quando o limite de empréstimos foi atingido")
+    void createLoan_WhenLoanLimitExceeded_ShouldThrowException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
+        when(loanRepository.countByUserAndStatus(activeUser, LoanStatus.ATIVO)).thenReturn(3);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            loanService.createLoan(loanRequestDTO);
+        });
+
+        assertEquals("Usuário já possui 3 empréstimos ativos. Limite excedido.", exception.getMessage());
+        verify(loanRepository, never()).save(any(Loan.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar criar empréstimo com usuário inativo")
+    void createLoan_WhenUserIsInactive_ShouldThrowException() {
+        activeUser.setStatus(UserStatus.INATIVO);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            loanService.createLoan(loanRequestDTO);
+        });
+
+        assertEquals("Usuário não está ativo e não pode realizar empréstimos.", exception.getMessage());
+        verify(loanRepository, never()).save(any(Loan.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar ResourceNotFoundException quando o usuário não existe")
+    void createLoan_WhenUserNotFound_ShouldThrowException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            loanService.createLoan(loanRequestDTO);
+        });
     }
 }
