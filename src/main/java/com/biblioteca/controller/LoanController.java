@@ -45,7 +45,7 @@ public class LoanController {
         return ResponseEntity.ok(loans);
     }
 
-    @PutMapping("/{id}/return")
+    @PatchMapping("/{id}/return")
     public ResponseEntity<?> returnLoan(@PathVariable Long id) {
         try {
             Loan returnedLoan = loanService.returnLoan(id);
