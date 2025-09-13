@@ -1,8 +1,7 @@
 {
   "info": {
-    "_postman_id": "c1b2a3d4-e5f6-4a9b-8c7d-6e5f4a3b2c1d",
-    "name": "Biblioteca API",
-    "description": "Coleção de requisições para a API de Gerenciamento de Biblioteca.",
+    "_postman_id": "a1b2c3d4-e5f6-4a3b-8c2d-1e2f3a4b5c6d",
+    "name": "API Biblioteca",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -64,15 +63,15 @@
           "name": "Cadastrar Novo Livro",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"A Guerra dos Tronos\",\n  \"author\": \"George R. R. Martin\",\n  \"isbn\": \"978-8576570223\",\n  \"publicationYear\": 1996,\n  \"totalQuantity\": 10,\n  \"availableQuantity\": 10\n}"
+              "raw": "{\n    \"title\": \"O Hobbit\",\n    \"author\": \"J.R.R. Tolkien\",\n    \"isbn\": \"978-0345339683\",\n    \"publicationYear\": 1937,\n    \"totalQuantity\": 10,\n    \"availableQuantity\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/books",
@@ -82,6 +81,34 @@
               "path": [
                 "api",
                 "books"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Livro",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"O Hobbit (Edição de Colecionador)\",\n    \"author\": \"J.R.R. Tolkien\",\n    \"isbn\": \"978-0345339683\",\n    \"publicationYear\": 1937,\n    \"totalQuantity\": 10,\n    \"availableQuantity\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/books/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "books",
+                "1"
               ]
             }
           },
@@ -112,27 +139,28 @@
       "name": "Gerenciamento de Usuários",
       "item": [
         {
-          "name": "Cadastrar Novo Usuário",
+          "name": "Listar Todos os Usuários (Paginado)",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Carlos Lima\",\n  \"email\": \"carlos.lima@example.com\",\n  \"cpf\": \"111.222.333-44\"\n}"
-            },
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/users",
+              "raw": "{{baseUrl}}/api/users?page=0&size=5",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                }
               ]
             }
           },
@@ -156,6 +184,80 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Cadastrar Novo Usuário",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Carlos Drummond\",\n    \"email\": \"carlos.drummond@example.com\",\n    \"cpf\": \"111.222.333-44\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Usuário",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Carlos Drummond de Andrade\",\n    \"email\": \"carlos.d.andrade@example.com\",\n    \"cpf\": \"111.222.333-44\",\n    \"status\": \"ATIVO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remover Usuário",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "1"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -163,18 +265,18 @@
       "name": "Gerenciamento de Empréstimos",
       "item": [
         {
-          "name": "Realizar Empréstimo",
+          "name": "Realizar Novo Empréstimo",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": 1,\n  \"bookId\": 1\n}"
+              "raw": "{\n    \"userId\": 1,\n    \"bookId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/loans",
@@ -190,7 +292,55 @@
           "response": []
         },
         {
-          "name": "Registrar Devolução",
+          "name": "Listar Todos os Empréstimos (Paginado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "loans"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Empréstimos de um Usuário",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/user/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "loans",
+                "user",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar Devolução de um Empréstimo",
           "request": {
             "method": "PUT",
             "header": [],
@@ -215,7 +365,9 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080"
+      "value": "http://localhost:8080",
+      "type": "string"
     }
   ]
 }
+
