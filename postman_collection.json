@@ -9,12 +9,12 @@
       "name": "Gerenciamento de Livros",
       "item": [
         {
-          "name": "Listar Todos os Livros (Paginado)",
+          "name": "Listar Todos os Livros",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/books?page=0&size=5&sort=title,asc",
+              "raw": "{{baseUrl}}/api/books",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -139,12 +139,12 @@
       "name": "Gerenciamento de Usuários",
       "item": [
         {
-          "name": "Listar Todos os Usuários (Paginado)",
+          "name": "Listar Todos os Usuários",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/users?page=0&size=5",
+              "raw": "{{baseUrl}}/api/users",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -292,12 +292,12 @@
           "response": []
         },
         {
-          "name": "Listar Todos os Empréstimos (Paginado)",
+          "name": "Listar Todos os Empréstimos",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/loans?page=0&size=10",
+              "raw": "{{baseUrl}}/api/loans",
               "host": [
                 "{{baseUrl}}"
               ],
