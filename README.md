@@ -76,7 +76,9 @@ A API foi construída utilizando uma **arquitetura em camadas** (Controller, Ser
 Clone o repositório:
 ```bash
 git clone https://github.com/seu-usuario/biblioteca-api.git
+
 cd biblioteca-api
+```
 
 Crie o banco de dados no PostgreSQL:
 
