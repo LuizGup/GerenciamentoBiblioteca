@@ -2,7 +2,7 @@
 
 <p>
 API RESTful completa para gerenciar livros, usuários e empréstimos.<br>
-Desenvolvida com <b>Java 21</b> e <b>Spring Boot 3</b> como parte de um desafio técnico.
+Desenvolvida com <b>Java 21</b> e <b>Spring Boot 3</b>.
 </p>
 
 <p>
