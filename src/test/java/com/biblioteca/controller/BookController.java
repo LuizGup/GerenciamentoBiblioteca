@@ -65,6 +65,11 @@ class BookControllerTest {
         Book newBook = new Book();
         newBook.setId(1L);
         newBook.setTitle("O Hobbit");
+        newBook.setAuthor("J.R.R. Tolkien");
+        newBook.setIsbn("978-0345339634");
+        newBook.setPublicationYear(1937);
+        newBook.setTotalQuantity(10);
+        newBook.setAvailableQuantity(10);
         given(bookService.createBook(any(Book.class))).willReturn(newBook);
 
         mockMvc.perform(post("/api/books")
@@ -80,6 +85,11 @@ class BookControllerTest {
         Book updatedBook = new Book();
         updatedBook.setId(1L);
         updatedBook.setTitle("O Hobbit 2");
+        updatedBook.setAuthor("J.R.R. Tolkien Junior");
+        updatedBook.setIsbn("978-0345339680");
+        updatedBook.setPublicationYear(1938);
+        updatedBook.setTotalQuantity(12);
+        updatedBook.setAvailableQuantity(11);
         given(bookService.updateBook(anyLong(), any(Book.class))).willReturn(updatedBook);
 
         mockMvc.perform(put("/api/books/1")
