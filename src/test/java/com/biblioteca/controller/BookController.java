@@ -15,11 +15,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,7 +33,7 @@ class BookControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean // 2. Substituir @MockBean por @MockitoBean
+    @MockitoBean
     private BookService bookService;
 
     @Test
@@ -97,6 +97,26 @@ class BookControllerTest {
                         .content(objectMapper.writeValueAsString(updatedBook)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("O Hobbit 2"));
+    }
+
+    @Test
+    @DisplayName("Deve lançar status 404 ao tentar atualizar um livro que não existe")
+    void updateBook_WhenBookNotFound_ShouldReturnNotFound() throws Exception {
+        Book updatedBook = new Book();
+        updatedBook.setTitle("O Hobbit 2");
+        updatedBook.setAuthor("J.R.R. Tolkien Junior");
+        updatedBook.setIsbn("978-0345339680");
+        updatedBook.setPublicationYear(1938);
+        updatedBook.setTotalQuantity(12);
+        updatedBook.setAvailableQuantity(11);
+
+        given(bookService.updateBook(eq(99L), any(Book.class)))
+                .willThrow(new ResourceNotFoundException("Livro não encontrado"));
+
+        mockMvc.perform(put("/api/books/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedBook)))
+                .andExpect(status().isNotFound()); 
     }
 
     @Test
