@@ -122,7 +122,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Deve retornar status 404 ao tentar deletar um usuário que não existe")
     void deleteUser_WithNonExistingId_ShouldReturnNotFound() throws Exception {
-        doThrow(new ResourceNotFoundException("Livro não encontrado")).when(userService).deleteUser(99L);
+        doThrow(new ResourceNotFoundException("Usuário não encontrado")).when(userService).deleteUser(99L);
 
         mockMvc.perform(delete("/api/users/99"))
                 .andExpect(status().isNotFound());
