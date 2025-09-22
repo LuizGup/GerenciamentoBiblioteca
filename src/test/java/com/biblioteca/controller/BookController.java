@@ -116,7 +116,7 @@ class BookControllerTest {
         mockMvc.perform(put("/api/books/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedBook)))
-                .andExpect(status().isNotFound()); 
+                .andExpect(status().isNotFound());
     }
 
     @Test
