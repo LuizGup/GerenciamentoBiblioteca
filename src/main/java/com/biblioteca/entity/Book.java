@@ -27,14 +27,17 @@ public class Book {
     @Column(nullable = false)
     private String author;
 
+    @NotNull(message = "O campo isbn não pode ser nulo")
     @Column(nullable = false, unique = true)
     private String isbn;
 
     private Integer publicationYear;
 
+    @NotNull(message = "O campo totalQuantity não pode ser nulo")
     @Column(nullable = false)
     private Integer totalQuantity;
 
+    @NotNull(message = "O campo availableQuantity não pode ser nulo")
     @Column(nullable = false)
     private Integer availableQuantity;
 
