@@ -16,15 +16,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -95,10 +91,26 @@ class LoanControllerTest {
 
         given(loanService.returnLoan(1L)).willReturn(returnedLoan);
 
-        mockMvc.perform(get("/api/loans/1/return"))
+        mockMvc.perform(patch("/api/loans/1/return"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DEVOLVIDO"));
     }
 
+    @Test
+    @DisplayName("Deve retornar status 400 ao tentar criar empréstimo para usuário que não existe")
+    void createLoan_WithNonExistingUser_ShouldReturnBadRequest() throws Exception {
+
+        LoanRequestDTO loanRequestDTO = new LoanRequestDTO();
+        loanRequestDTO.setUserId(99L);
+        loanRequestDTO.setBookId(1L);
+
+        given(loanService.createLoan(any(LoanRequestDTO.class)))
+                .willThrow(new ResourceNotFoundException("Usuário não encontrado"));
+
+        mockMvc.perform(post("/api/loans")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loanRequestDTO)))
+                .andExpect(status().isBadRequest());
+    }
 
 }
