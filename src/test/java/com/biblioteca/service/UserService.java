@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,6 +51,19 @@ class UserServiceTest {
         assertNotNull(savedUser);
         assertEquals("Carlos Santana", savedUser.getName());
         verify(userRepository, times(1)).save(any(Users.class));
+    }
+
+    @Test
+    @DisplayName("Deve buscar e retornar todos os usuários")
+    void findAllUsers_Success() {
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+
+        List<Users> result = userService.findAllUsers();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(userRepository, times(1)).findAll();
     }
 
     @Test

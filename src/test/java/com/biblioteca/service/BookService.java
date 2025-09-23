@@ -2,6 +2,7 @@ package com.biblioteca.service;
 
 import com.biblioteca.entity.Book;
 import com.biblioteca.entity.BookStatus;
+import com.biblioteca.entity.Users;
 import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.BookRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +56,19 @@ class BookServiceTest {
         assertNotNull(savedBook);
         assertEquals(BookStatus.DISPONIVEL, savedBook.getStatus());
         verify(bookRepository, times(1)).save(any(Book.class));
+    }
+
+    @Test
+    @DisplayName("Deve buscar e retornar todos os livros")
+    void findAllBooks_Success() {
+
+        when(bookRepository.findAll()).thenReturn(List.of(book));
+
+        List<Book> result = bookService.findAllBooks();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(bookRepository, times(1)).findAll();
     }
 
     @Test
