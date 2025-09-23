@@ -23,7 +23,7 @@ public class LoanController {
     private LoanService loanService;
 
     @PostMapping
-    public ResponseEntity<?> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
+    public ResponseEntity<Loan> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
         Loan newLoan = loanService.createLoan(loanRequest);
         return new ResponseEntity<>(newLoan, HttpStatus.CREATED);
     }
