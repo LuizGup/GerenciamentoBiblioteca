@@ -98,8 +98,8 @@ class LoanControllerTest {
     }
 
     @Test
-    @DisplayName("Deve retornar status 400 ao tentar criar empréstimo para usuário que não existe")
-    void createLoan_WithNonExistingUser_ShouldReturnBadRequest() throws Exception {
+    @DisplayName("Deve retornar status 404 ao tentar criar empréstimo para usuário que não existe")
+    void createLoan_WithNonExistingUser_ShouldReturnNotFound() throws Exception {
 
         LoanRequestDTO loanRequestDTO = new LoanRequestDTO();
         loanRequestDTO.setUserId(99L);
@@ -111,7 +111,7 @@ class LoanControllerTest {
         mockMvc.perform(post("/api/loans")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loanRequestDTO)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @Test
