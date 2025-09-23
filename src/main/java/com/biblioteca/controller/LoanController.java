@@ -42,7 +42,7 @@ public class LoanController {
     }
 
     @PatchMapping("/{id}/return")
-    public ResponseEntity<?> returnLoan(@PathVariable Long id) {
+    public ResponseEntity<Loan> returnLoan(@PathVariable Long id) {
         Loan returnedLoan = loanService.returnLoan(id);
         return ResponseEntity.ok(returnedLoan);
     }
