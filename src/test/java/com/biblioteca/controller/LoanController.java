@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -69,6 +70,20 @@ class LoanControllerTest {
         mockMvc.perform(get("/api/loans"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty());
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 200 e um empréstimo ao buscar por ID do usuário existente")
+    void getLoanById_WithExistingUserId_ShouldReturnOk() throws Exception {
+        Loan newLoan = new Loan();
+        newLoan.setId(1L);
+        newLoan.setStatus(LoanStatus.ATIVO);
+
+        given(loanService.findLoansByUserId(1L)).willReturn(List.of(newLoan));
+
+        mockMvc.perform(get("/api/loans/user/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].status").value("ATIVO"));
     }
 
 
