@@ -39,21 +39,13 @@ public class BookController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Book> updateBook(@PathVariable Long id, @Valid @RequestBody Book bookDetails) {
-        try {
-            Book updatedBook = BookService.updateBook(id, bookDetails);
-            return new ResponseEntity<>(updatedBook, HttpStatus.OK);
-        } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Book updatedBook = BookService.updateBook(id, bookDetails);
+        return new ResponseEntity<>(updatedBook, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
-        try {
-            BookService.deleteBook(id);
-            return ResponseEntity.noContent().build();
-        } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        BookService.deleteBook(id);
+        return ResponseEntity.noContent().build();
     }
 }

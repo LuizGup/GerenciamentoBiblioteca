@@ -40,21 +40,13 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Users> updateUser(@PathVariable Long id, @Valid @RequestBody Users userDetails) {
-        try{
-            Users updatedUser = UserService.updateUser(id, userDetails);
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
-        } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Users updatedUser = UserService.updateUser(id, userDetails);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Users> deleteUser(@PathVariable Long id) {
-        try{
-            UserService.deleteUser(id);
-            return ResponseEntity.noContent().build();
-        } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        UserService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

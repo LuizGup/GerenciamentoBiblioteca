@@ -23,13 +23,9 @@ public class LoanController {
     private LoanService loanService;
 
     @PostMapping
-    public ResponseEntity<?> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
-        try {
-            Loan newLoan = loanService.createLoan(loanRequest);
-            return new ResponseEntity<>(newLoan, HttpStatus.CREATED);
-        } catch (IllegalStateException | ResourceNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Loan> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
+        Loan newLoan = loanService.createLoan(loanRequest);
+        return new ResponseEntity<>(newLoan, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -46,12 +42,8 @@ public class LoanController {
     }
 
     @PatchMapping("/{id}/return")
-    public ResponseEntity<?> returnLoan(@PathVariable Long id) {
-        try {
-            Loan returnedLoan = loanService.returnLoan(id);
-            return ResponseEntity.ok(returnedLoan);
-        } catch (IllegalStateException | ResourceNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Loan> returnLoan(@PathVariable Long id) {
+        Loan returnedLoan = loanService.returnLoan(id);
+        return ResponseEntity.ok(returnedLoan);
     }
 }
