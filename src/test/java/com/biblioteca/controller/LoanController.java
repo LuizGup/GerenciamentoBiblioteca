@@ -86,5 +86,19 @@ class LoanControllerTest {
                 .andExpect(jsonPath("$.[0].status").value("ATIVO"));
     }
 
+    @Test
+    @DisplayName("Deve retornar status 200 e um retorno empréstimo ao retornar um empréstimo buscando por Id")
+    void returnLoanById_WithExistingId_ShouldReturnOk() throws Exception {
+        Loan returnedLoan = new Loan();
+        returnedLoan.setId(1L);
+        returnedLoan.setStatus(LoanStatus.DEVOLVIDO);
+
+        given(loanService.returnLoan(1L)).willReturn(returnedLoan);
+
+        mockMvc.perform(get("/api/loans/1/return"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("DEVOLVIDO"));
+    }
+
 
 }
