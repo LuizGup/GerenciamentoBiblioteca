@@ -21,6 +21,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -111,6 +112,20 @@ class LoanControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loanRequestDTO)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 404 ao tentar retornar um empréstimo que não existe")
+    void returnLoanById_WithNonExistingId_ShouldReturnNotFound() throws Exception {
+        Loan returnedLoan = new Loan();
+        returnedLoan.setId(1L);
+        returnedLoan.setStatus(LoanStatus.DEVOLVIDO);
+
+        given(loanService.returnLoan(99L))
+                .willThrow(new ResourceNotFoundException("empréstimo não encontrado"));
+
+        mockMvc.perform(patch("/api/loans/99/return"))
+                .andExpect(status().isNotFound());
     }
 
 }
