@@ -48,13 +48,10 @@ class BookServiceTest {
     @Test
     @DisplayName("Deve criar um livro com status DISPONIVEL quando a quantidade é positiva")
     void createBook_WithPositiveQuantity_ShouldSetStatusToAvailable() {
-        // Arrange
         when(bookRepository.save(any(Book.class))).thenReturn(book);
 
-        // Act
         Book savedBook = bookService.createBook(book);
 
-        // Assert
         assertNotNull(savedBook);
         assertEquals(BookStatus.DISPONIVEL, savedBook.getStatus());
         verify(bookRepository, times(1)).save(any(Book.class));
@@ -100,6 +97,25 @@ class BookServiceTest {
     }
 
     @Test
+    @DisplayName("Deve atualizar o status para INDISPONIVEL quando a quantidade for zero")
+    void updateBook_WithZeroQuantity_ShouldSetStatusToUnavailable() {
+        // Arrange
+        Book bookDetails = new Book();
+        bookDetails.setTitle("As Duas Torres");
+        bookDetails.setAvailableQuantity(0);
+
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(bookRepository.save(any(Book.class))).thenReturn(book);
+
+        // Act
+        Book updatedBook = bookService.updateBook(1L, bookDetails);
+
+        // Assert
+        assertEquals(BookStatus.INDISPONIVEL, updatedBook.getStatus());
+        verify(bookRepository, times(1)).save(book);
+    }
+
+    @Test
     @DisplayName("Deve lançar exceção ao tentar atualizar um livro que não existe")
     void updateBook_WhenBookNotFound_ShouldThrowException() {
         // Arrange
@@ -124,6 +140,21 @@ class BookServiceTest {
 
         // Assert
         verify(bookRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar deletar um livro que não existe")
+    void deleteBook_WhenBookNotFound_ShouldThrowException() {
+        // Arrange
+        when(bookRepository.existsById(99L)).thenReturn(false);
+
+        // Act & Assert: Verifique se a exceção correta é lançada
+        assertThrows(ResourceNotFoundException.class, () -> {
+            bookService.deleteBook(99L);
+        });
+
+        // Verify: Garanta que o método de deleção nunca foi chamado
+        verify(bookRepository, never()).deleteById(anyLong());
     }
 
     @Test
