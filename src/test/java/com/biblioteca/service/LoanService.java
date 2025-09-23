@@ -13,8 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +40,9 @@ class LoanServiceTest {
     private Book availableBook;
     private LoanRequestDTO loanRequestDTO;
 
+    private Loan loan;
+
+
     @BeforeEach
     void setUp() {
         activeUser = new Users();
@@ -52,6 +57,11 @@ class LoanServiceTest {
         loanRequestDTO = new LoanRequestDTO();
         loanRequestDTO.setUserId(1L);
         loanRequestDTO.setBookId(1L);
+
+        loan.setId(1L);
+        loan.setStatus(LoanStatus.ATIVO);
+        loan.setBook(availableBook);
+        loan.setUser(activeUser);
     }
 
     @Test
@@ -73,6 +83,18 @@ class LoanServiceTest {
 
         verify(bookRepository, times(1)).save(availableBook);
         verify(loanRepository, times(1)).save(any(Loan.class));
+    }
+
+    @Test
+    @DisplayName("Deve buscar e retornar todos os empréstimos")
+    void findAllLoans_Success() {
+        when(loanRepository.findAll()).thenReturn(List.of(loan));
+
+        List<Loan> result = loanService.findAllLoans();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(userRepository, times(1)).findAll();
     }
 
     @Test

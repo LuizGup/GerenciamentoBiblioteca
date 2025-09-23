@@ -29,9 +29,8 @@ public class LoanController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Loan>> getAllLoans(
-            @PageableDefault(page = 0, size = 10, sort = "loanDate") Pageable pageable) {
-        Page<Loan> loans = loanService.findAllLoans(pageable);
+    public ResponseEntity<List<Loan>> getAllLoans(){
+        List<Loan> loans = loanService.findAllLoans();
         return ResponseEntity.ok(loans);
     }
 

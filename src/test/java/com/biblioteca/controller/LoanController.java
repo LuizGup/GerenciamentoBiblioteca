@@ -62,11 +62,11 @@ class LoanControllerTest {
     @Test
     @DisplayName("Deve retornar status 200 e uma lista vazia quando não há empréstimos")
     void getAllLoans_ShouldReturnOkAndEmptyList() throws Exception {
-        given(loanService.findAllLoans(any(Pageable.class))).willReturn(new PageImpl<>(Collections.emptyList()));
+        given(loanService.findAllLoans()).willReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/loans"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isEmpty());
+                .andExpect(jsonPath("$").isEmpty());
     }
 
     @Test

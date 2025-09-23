@@ -85,8 +85,8 @@ public class LoanService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Loan> findAllLoans(Pageable pageable) {
-        return loanRepository.findAll(pageable);
+    public List<Loan> findAllLoans() {
+        return loanRepository.findAll();
     }
 
     @Transactional(readOnly = true)
