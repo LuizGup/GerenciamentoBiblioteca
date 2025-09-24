@@ -105,15 +105,9 @@ class LoanServiceTest {
     @Test
     @DisplayName("Deve retornar um empréstimo com sucesso quando todas as regras são atendidas")
     void returnLoan_Success() {
-        Loan activeLoan = new Loan();
-        activeLoan.setId(1L);
-        activeLoan.setStatus(LoanStatus.ATIVO);
-        activeLoan.setBook(availableBook);
-        activeLoan.setUser(activeUser);
-
         int initialQuantity = availableBook.getAvailableQuantity();
 
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(activeLoan));
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
         when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Loan returnedLoan = loanService.returnLoan(1L);
@@ -123,7 +117,7 @@ class LoanServiceTest {
         assertNotNull(returnedLoan.getReturnDate());
         assertEquals(initialQuantity + 1, returnedLoan.getBook().getAvailableQuantity());
 
-        verify(loanRepository, times(1)).save(activeLoan);
+        verify(loanRepository, times(1)).save(loan);
         verify(bookRepository, times(1)).save(availableBook);
     }
 
