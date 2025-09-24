@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LoanService {
@@ -86,16 +87,22 @@ public class LoanService {
     }
 
     @Transactional(readOnly = true)
-    public List<Loan> findAllLoans() {
-        return loanRepository.findAll();
+    public List<LoanResponseDTO> findAllLoans() {
+        return loanRepository.findAll()
+                .stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<Loan> findLoansByUserId(Long userId) {
+    public List<LoanResponseDTO> findLoansByUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException("Usuário não encontrado com ID: " + userId);
         }
-        return loanRepository.findByUserId(userId);
+        return loanRepository.findByUserId(userId)
+                .stream() // Converte a lista para uma stream
+                .map(this::convertToResponseDTO) // Aplica a conversão para cada empréstimo
+                .collect(Collectors.toList()); // Coleta em uma nova lista de DTOs
     }
 
     private LoanResponseDTO convertToResponseDTO(Loan loan) {
