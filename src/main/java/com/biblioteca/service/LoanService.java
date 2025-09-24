@@ -1,6 +1,7 @@
 package com.biblioteca.service;
 
 import com.biblioteca.dto.LoanRequestDTO;
+import com.biblioteca.dto.LoanResponseDTO;
 import com.biblioteca.entity.*;
 import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.BookRepository;
@@ -28,7 +29,7 @@ public class LoanService {
     private BookRepository bookRepository;
 
     @Transactional
-    public Loan createLoan(LoanRequestDTO loanRequest) {
+    public LoanResponseDTO createLoan(LoanRequestDTO loanRequest) {
         Users user = userRepository.findById(loanRequest.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com ID: " + loanRequest.getUserId()));
 
@@ -59,7 +60,9 @@ public class LoanService {
         newLoan.setExpectedReturnDate(LocalDate.now().plusDays(LOAN_PERIOD_DAYS));
         newLoan.setStatus(LoanStatus.ATIVO);
 
-        return loanRepository.save(newLoan);
+        Loan savedLoan = loanRepository.save(newLoan); // Salva primeiro
+
+        return convertToResponseDTO(savedLoan);
     }
 
     @Transactional
@@ -95,5 +98,19 @@ public class LoanService {
             throw new ResourceNotFoundException("Usuário não encontrado com ID: " + userId);
         }
         return loanRepository.findByUserId(userId);
+    }
+    // Em LoanService.java (adicione ao final da classe)
+
+    private LoanResponseDTO convertToResponseDTO(Loan loan) {
+        LoanResponseDTO dto = new LoanResponseDTO();
+        dto.setId(loan.getId());
+        dto.setBookId(loan.getBook().getId());
+        dto.setBookTitle(loan.getBook().getTitle()); // Expondo apenas o necessário
+        dto.setUserId(loan.getUser().getId());
+        dto.setUserName(loan.getUser().getName()); // Expondo apenas o necessário
+        dto.setLoanDate(loan.getLoanDate());
+        dto.setExpectedReturnDate(loan.getExpectedReturnDate());
+        dto.setStatus(loan.getStatus());
+        return dto;
     }
 }
