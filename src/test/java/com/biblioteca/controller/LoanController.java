@@ -76,7 +76,7 @@ class LoanControllerTest {
     }
 
     @Test
-    @DisplayName("Deve retornar status 200 e um empréstimo ao buscar por ID do usuário existentcom o DTO de respostae")
+    @DisplayName("Deve retornar status 200 e um empréstimo ao buscar por ID do usuário existente com o DTO de resposta")
     void getLoanById_WithExistingUserId_ShouldReturnOk() throws Exception {
         // Crie o DTO que você espera que o serviço retorne
         LoanResponseDTO responseDTO = new LoanResponseDTO();
