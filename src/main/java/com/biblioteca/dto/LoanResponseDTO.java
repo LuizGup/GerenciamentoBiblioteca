@@ -1,4 +1,3 @@
-// no pacote com.biblioteca.dto
 package com.biblioteca.dto;
 
 import com.biblioteca.entity.LoanStatus;
