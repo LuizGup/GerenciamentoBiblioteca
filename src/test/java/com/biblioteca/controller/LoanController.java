@@ -11,8 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -78,7 +76,6 @@ class LoanControllerTest {
     @Test
     @DisplayName("Deve retornar status 200 e um empréstimo ao buscar por ID do usuário existente com o DTO de resposta")
     void getLoanById_WithExistingUserId_ShouldReturnOk() throws Exception {
-        // Crie o DTO que você espera que o serviço retorne
         LoanResponseDTO responseDTO = new LoanResponseDTO();
         responseDTO.setId(1L);
         responseDTO.setStatus(LoanStatus.ATIVO);
@@ -93,11 +90,11 @@ class LoanControllerTest {
     @Test
     @DisplayName("Deve retornar status 200 e um retorno empréstimo ao retornar um empréstimo buscando por Id")
     void returnLoanById_WithExistingId_ShouldReturnOk() throws Exception {
-        Loan returnedLoan = new Loan();
-        returnedLoan.setId(1L);
-        returnedLoan.setStatus(LoanStatus.DEVOLVIDO);
+        LoanResponseDTO responseDTO = new LoanResponseDTO();
+        responseDTO.setId(1L);
+        responseDTO.setStatus(LoanStatus.DEVOLVIDO);
 
-        given(loanService.returnLoan(1L)).willReturn(returnedLoan);
+        given(loanService.returnLoan(1L)).willReturn(responseDTO);
 
         mockMvc.perform(patch("/api/loans/1/return"))
                 .andExpect(status().isOk())

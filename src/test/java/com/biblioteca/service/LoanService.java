@@ -14,9 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,7 +67,7 @@ class LoanServiceTest {
     }
 
     @Test
-    @DisplayName("Deve criar um empréstimo com sucesso quando todas as regras são atendidas")
+    @DisplayName("Deve criar um empréstimo e retornar um DTO com sucesso")
     void createLoan_Success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
         when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
@@ -103,20 +101,17 @@ class LoanServiceTest {
     }
 
     @Test
-    @DisplayName("Deve retornar um empréstimo com sucesso quando todas as regras são atendidas")
+    @DisplayName("Deve devolver um empréstimo com sucesso e retornar um DTO")
     void returnLoan_Success() {
         int initialQuantity = availableBook.getAvailableQuantity();
-
         when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
-        when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(loanRepository.save(any(Loan.class))).thenReturn(loan);
 
-        Loan returnedLoan = loanService.returnLoan(1L);
+        LoanResponseDTO returnedLoanDTO = loanService.returnLoan(1L);
 
-        assertNotNull(returnedLoan);
-        assertEquals(LoanStatus.DEVOLVIDO, returnedLoan.getStatus());
-        assertNotNull(returnedLoan.getReturnDate());
-        assertEquals(initialQuantity + 1, returnedLoan.getBook().getAvailableQuantity());
-
+        assertNotNull(returnedLoanDTO);
+        assertEquals(LoanStatus.DEVOLVIDO, returnedLoanDTO.getStatus());
+        assertEquals(initialQuantity + 1, availableBook.getAvailableQuantity());
         verify(loanRepository, times(1)).save(loan);
         verify(bookRepository, times(1)).save(availableBook);
     }
@@ -175,6 +170,37 @@ class LoanServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> {
             loanService.createLoan(loanRequestDTO);
+        });
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar devolver um empréstimo que não existe")
+    void returnLoan_WhenLoanNotFound_ShouldThrowException() {
+        when(loanRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            loanService.returnLoan(99L);
+        });
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar devolver um empréstimo já devolvido")
+    void returnLoan_WhenLoanAlreadyReturned_ShouldThrowException() {
+        loan.setStatus(LoanStatus.DEVOLVIDO);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+
+        assertThrows(IllegalStateException.class, () -> {
+            loanService.returnLoan(1L);
+        });
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao buscar empréstimos de um usuário que não existe")
+    void findLoansByUserId_WhenUserNotFound_ShouldThrowException() {
+        when(userRepository.existsById(99L)).thenReturn(false);
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            loanService.findLoansByUserId(99L);
         });
     }
 }
