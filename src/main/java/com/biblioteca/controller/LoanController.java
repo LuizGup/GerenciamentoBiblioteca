@@ -1,6 +1,7 @@
 package com.biblioteca.controller;
 
 import com.biblioteca.dto.LoanRequestDTO;
+import com.biblioteca.dto.LoanResponseDTO;
 import com.biblioteca.entity.Loan;
 import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.service.LoanService;
@@ -23,9 +24,9 @@ public class LoanController {
     private LoanService loanService;
 
     @PostMapping
-    public ResponseEntity<Loan> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
-        Loan newLoan = loanService.createLoan(loanRequest);
-        return new ResponseEntity<>(newLoan, HttpStatus.CREATED);
+    public ResponseEntity<LoanResponseDTO> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
+        LoanResponseDTO newLoanDTO = loanService.createLoan(loanRequest);
+        return new ResponseEntity<>(newLoanDTO, HttpStatus.CREATED);
     }
 
     @GetMapping
