@@ -65,7 +65,7 @@ public class LoanService {
     }
 
     @Transactional
-    public Loan returnLoan(Long loanId) {
+    public LoanResponseDTO returnLoan(Long loanId) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new ResourceNotFoundException("Empréstimo não encontrado com ID: " + loanId));
 
@@ -83,7 +83,9 @@ public class LoanService {
         loan.setReturnDate(LocalDate.now());
         loan.setStatus(LoanStatus.DEVOLVIDO);
 
-        return loanRepository.save(loan);
+        Loan savedLoan = loanRepository.save(loan);
+
+        return convertToResponseDTO(savedLoan);
     }
 
     @Transactional(readOnly = true)
