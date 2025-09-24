@@ -1,6 +1,7 @@
 package com.biblioteca.controller;
 
 import com.biblioteca.dto.LoanRequestDTO;
+import com.biblioteca.dto.LoanResponseDTO;
 import com.biblioteca.entity.Loan;
 import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.service.LoanService;
@@ -23,21 +24,20 @@ public class LoanController {
     private LoanService loanService;
 
     @PostMapping
-    public ResponseEntity<Loan> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
-        Loan newLoan = loanService.createLoan(loanRequest);
-        return new ResponseEntity<>(newLoan, HttpStatus.CREATED);
+    public ResponseEntity<LoanResponseDTO> createLoan(@Valid @RequestBody LoanRequestDTO loanRequest) {
+        LoanResponseDTO newLoanDTO = loanService.createLoan(loanRequest);
+        return new ResponseEntity<>(newLoanDTO, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<Page<Loan>> getAllLoans(
-            @PageableDefault(page = 0, size = 10, sort = "loanDate") Pageable pageable) {
-        Page<Loan> loans = loanService.findAllLoans(pageable);
+    public ResponseEntity<List<LoanResponseDTO>> getAllLoans(){
+        List<LoanResponseDTO> loans = loanService.findAllLoans();
         return ResponseEntity.ok(loans);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Loan>> getLoansByUserId(@PathVariable Long userId) {
-        List<Loan> loans = loanService.findLoansByUserId(userId);
+    public ResponseEntity<List<LoanResponseDTO>> getLoansByUserId(@PathVariable Long userId) {
+        List<LoanResponseDTO> loans = loanService.findLoansByUserId(userId);
         return ResponseEntity.ok(loans);
     }
 

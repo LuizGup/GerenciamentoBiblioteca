@@ -1,19 +1,19 @@
 package com.biblioteca.service;
 
 import com.biblioteca.dto.LoanRequestDTO;
+import com.biblioteca.dto.LoanResponseDTO;
 import com.biblioteca.entity.*;
 import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.BookRepository;
 import com.biblioteca.repository.LoanRepository;
 import com.biblioteca.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LoanService {
@@ -28,7 +28,7 @@ public class LoanService {
     private BookRepository bookRepository;
 
     @Transactional
-    public Loan createLoan(LoanRequestDTO loanRequest) {
+    public LoanResponseDTO createLoan(LoanRequestDTO loanRequest) {
         Users user = userRepository.findById(loanRequest.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com ID: " + loanRequest.getUserId()));
 
@@ -59,7 +59,9 @@ public class LoanService {
         newLoan.setExpectedReturnDate(LocalDate.now().plusDays(LOAN_PERIOD_DAYS));
         newLoan.setStatus(LoanStatus.ATIVO);
 
-        return loanRepository.save(newLoan);
+        Loan savedLoan = loanRepository.save(newLoan); // Salva primeiro
+
+        return convertToResponseDTO(savedLoan);
     }
 
     @Transactional
@@ -85,15 +87,34 @@ public class LoanService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Loan> findAllLoans(Pageable pageable) {
-        return loanRepository.findAll(pageable);
+    public List<LoanResponseDTO> findAllLoans() {
+        return loanRepository.findAll()
+                .stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<Loan> findLoansByUserId(Long userId) {
+    public List<LoanResponseDTO> findLoansByUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException("Usuário não encontrado com ID: " + userId);
         }
-        return loanRepository.findByUserId(userId);
+        return loanRepository.findByUserId(userId)
+                .stream() // Converte a lista para uma stream
+                .map(this::convertToResponseDTO) // Aplica a conversão para cada empréstimo
+                .collect(Collectors.toList()); // Coleta em uma nova lista de DTOs
+    }
+
+    private LoanResponseDTO convertToResponseDTO(Loan loan) {
+        LoanResponseDTO dto = new LoanResponseDTO();
+        dto.setId(loan.getId());
+        dto.setBookId(loan.getBook().getId());
+        dto.setBookTitle(loan.getBook().getTitle()); // Expondo apenas o necessário
+        dto.setUserId(loan.getUser().getId());
+        dto.setUserName(loan.getUser().getName()); // Expondo apenas o necessário
+        dto.setLoanDate(loan.getLoanDate());
+        dto.setExpectedReturnDate(loan.getExpectedReturnDate());
+        dto.setStatus(loan.getStatus());
+        return dto;
     }
 }

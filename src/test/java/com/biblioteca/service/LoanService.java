@@ -1,6 +1,7 @@
 package com.biblioteca.service;
 
 import com.biblioteca.dto.LoanRequestDTO;
+import com.biblioteca.dto.LoanResponseDTO;
 import com.biblioteca.entity.*;
 import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.BookRepository;
@@ -13,8 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,20 +41,31 @@ class LoanServiceTest {
     private Book availableBook;
     private LoanRequestDTO loanRequestDTO;
 
+    private Loan loan;
+
+
     @BeforeEach
     void setUp() {
         activeUser = new Users();
         activeUser.setId(1L);
+        activeUser.setName("Carlos Santana");
         activeUser.setStatus(UserStatus.ATIVO);
 
         availableBook = new Book();
         availableBook.setId(1L);
+        availableBook.setTitle("O Senhor dos Anéis");
         availableBook.setStatus(BookStatus.DISPONIVEL);
         availableBook.setAvailableQuantity(5);
 
         loanRequestDTO = new LoanRequestDTO();
         loanRequestDTO.setUserId(1L);
         loanRequestDTO.setBookId(1L);
+
+        loan = new Loan();
+        loan.setId(1L);
+        loan.setStatus(LoanStatus.ATIVO);
+        loan.setBook(availableBook);
+        loan.setUser(activeUser);
     }
 
     @Test
@@ -60,19 +74,51 @@ class LoanServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
         when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
         when(loanRepository.countByUserAndStatus(activeUser, LoanStatus.ATIVO)).thenReturn(0);
-        when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(loanRepository.save(any(Loan.class))).thenReturn(loan);
 
+        LoanResponseDTO createdLoanDTO = loanService.createLoan(loanRequestDTO);
 
-        Loan createdLoan = loanService.createLoan(loanRequestDTO);
+        assertNotNull(createdLoanDTO);
+        assertEquals(LoanStatus.ATIVO, createdLoanDTO.getStatus());
 
-        assertNotNull(createdLoan);
-        assertEquals(LoanStatus.ATIVO, createdLoan.getStatus());
-        assertEquals(activeUser, createdLoan.getUser());
-        assertEquals(availableBook, createdLoan.getBook());
+        assertEquals(activeUser.getName(), createdLoanDTO.getUserName());
+        assertEquals(availableBook.getTitle(), createdLoanDTO.getBookTitle());
         assertEquals(4, availableBook.getAvailableQuantity());
 
         verify(bookRepository, times(1)).save(availableBook);
         verify(loanRepository, times(1)).save(any(Loan.class));
+    }
+
+    @Test
+    @DisplayName("Deve buscar e retornar todos os empréstimos")
+    void findAllLoans_Success() {
+        when(loanRepository.findAll()).thenReturn(List.of(loan));
+
+        List<LoanResponseDTO> result = loanService.findAllLoans();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+
+        verify(loanRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("Deve retornar um empréstimo com sucesso quando todas as regras são atendidas")
+    void returnLoan_Success() {
+        int initialQuantity = availableBook.getAvailableQuantity();
+
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Loan returnedLoan = loanService.returnLoan(1L);
+
+        assertNotNull(returnedLoan);
+        assertEquals(LoanStatus.DEVOLVIDO, returnedLoan.getStatus());
+        assertNotNull(returnedLoan.getReturnDate());
+        assertEquals(initialQuantity + 1, returnedLoan.getBook().getAvailableQuantity());
+
+        verify(loanRepository, times(1)).save(loan);
+        verify(bookRepository, times(1)).save(availableBook);
     }
 
     @Test
