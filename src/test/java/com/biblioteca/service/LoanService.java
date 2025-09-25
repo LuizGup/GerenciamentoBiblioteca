@@ -88,6 +88,41 @@ class LoanServiceTest {
     }
 
     @Test
+    @DisplayName("Deve definir o status do livro como INDISPONIVEL ao emprestar a última cópia")
+    void createLoan_WhenLastBookIsLoaned_ShouldSetBookStatusToUnavailable() {
+        availableBook.setAvailableQuantity(1);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
+        when(loanRepository.countByUserAndStatus(activeUser, LoanStatus.ATIVO)).thenReturn(0);
+        when(loanRepository.save(any(Loan.class))).thenReturn(loan);
+
+        loanService.createLoan(loanRequestDTO);
+
+        assertEquals(BookStatus.INDISPONIVEL, availableBook.getStatus());
+        verify(bookRepository, times(1)).save(availableBook);
+    }
+
+    @Test
+    @DisplayName("Deve definir o status do livro como DISPONIVEL ao devolver um livro que estava indisponível")
+    void returnLoan_WhenBookWasUnavailable_ShouldSetBookStatusToAvailable() {
+        availableBook.setAvailableQuantity(0);
+        availableBook.setStatus(BookStatus.INDISPONIVEL);
+        loan.setStatus(LoanStatus.ATIVO);
+        loan.setBook(availableBook);
+
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        when(loanRepository.save(any(Loan.class))).thenReturn(loan);
+
+        loanService.returnLoan(1L);
+
+        assertEquals(BookStatus.DISPONIVEL, availableBook.getStatus());
+        verify(bookRepository, times(1)).save(availableBook);
+    }
+
+
+
+    @Test
     @DisplayName("Deve buscar e retornar todos os empréstimos")
     void findAllLoans_Success() {
         when(loanRepository.findAll()).thenReturn(List.of(loan));
@@ -114,23 +149,6 @@ class LoanServiceTest {
         assertEquals(initialQuantity + 1, availableBook.getAvailableQuantity());
         verify(loanRepository, times(1)).save(loan);
         verify(bookRepository, times(1)).save(availableBook);
-    }
-
-    @Test
-    @DisplayName("Deve lançar exceção ao tentar criar empréstimo com livro indisponível")
-    void createLoan_WhenBookIsNotAvailable_ShouldThrowException() {
-        availableBook.setStatus(BookStatus.INDISPONIVEL);
-        availableBook.setAvailableQuantity(0);
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
-        when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
-
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            loanService.createLoan(loanRequestDTO);
-        });
-
-        assertEquals("Livro não está disponível para empréstimo.", exception.getMessage());
-        verify(loanRepository, never()).save(any(Loan.class));
     }
 
     @Test
@@ -195,12 +213,68 @@ class LoanServiceTest {
     }
 
     @Test
+    @DisplayName("Deve buscar e retornar os empréstimos de um usuário existente")
+    void findLoansByUserId_Success() {
+        when(userRepository.existsById(1L)).thenReturn(true);
+        when(loanRepository.findByUserId(1L)).thenReturn(List.of(loan));
+
+        List<LoanResponseDTO> result = loanService.findLoansByUserId(1L);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(loan.getId(), result.get(0).getId());
+        verify(userRepository, times(1)).existsById(1L);
+        verify(loanRepository, times(1)).findByUserId(1L);
+    }
+
+    @Test
     @DisplayName("Deve lançar exceção ao buscar empréstimos de um usuário que não existe")
     void findLoansByUserId_WhenUserNotFound_ShouldThrowException() {
         when(userRepository.existsById(99L)).thenReturn(false);
 
         assertThrows(ResourceNotFoundException.class, () -> {
             loanService.findLoansByUserId(99L);
+        });
+
+        verify(loanRepository, never()).findByUserId(anyLong());
+    }
+
+    @Test
+    @DisplayName("Deve lançar ResourceNotFoundException quando o livro não existe")
+    void createLoan_WhenBookNotFound_ShouldThrowException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
+        when(bookRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            loanService.createLoan(loanRequestDTO);
+        });
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar criar empréstimo com livro com status INDISPONIVEL")
+    void createLoan_WhenBookStatusIsUnavailable_ShouldThrowException() {
+        availableBook.setStatus(BookStatus.INDISPONIVEL);
+        availableBook.setAvailableQuantity(5);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
+
+        assertThrows(IllegalStateException.class, () -> {
+            loanService.createLoan(loanRequestDTO);
+        });
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar criar empréstimo com livro com quantidade disponível menor ou igual a zero")
+    void createLoan_WhenBookAvailableQuantityIsLessOrEqualToZero_ShouldThrowException() {
+        availableBook.setStatus(BookStatus.DISPONIVEL);
+        availableBook.setAvailableQuantity(0);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
+
+        assertThrows(IllegalStateException.class, () -> {
+            loanService.createLoan(loanRequestDTO);
         });
     }
 }
