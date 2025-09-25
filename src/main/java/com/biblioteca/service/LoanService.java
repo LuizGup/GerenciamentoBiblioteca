@@ -27,7 +27,7 @@ public class LoanService {
     @Autowired
     private BookRepository bookRepository;
 
-    @Transactional
+    @Transactional()
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequest) {
         Users user = userRepository.findById(loanRequest.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com ID: " + loanRequest.getUserId()));

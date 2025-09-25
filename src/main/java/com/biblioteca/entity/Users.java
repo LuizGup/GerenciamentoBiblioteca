@@ -35,6 +35,7 @@ public class Users {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+//    remover e atualizar
     @JsonManagedReference
     private List<Loan> loans;
 
