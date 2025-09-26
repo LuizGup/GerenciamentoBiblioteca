@@ -69,14 +69,11 @@ class BookServiceTest {
     @Test
     @DisplayName("Deve criar um livro com status INDISPONIVEL quando a quantidade é zero")
     void createBook_WithZeroQuantity_ShouldSetStatusToUnavailable() {
-        // Arrange
         book.setAvailableQuantity(0);
         when(bookRepository.save(any(Book.class))).thenReturn(book);
 
-        // Act
         Book savedBook = bookService.createBook(book);
 
-        // Assert
         assertNotNull(savedBook);
         assertEquals(BookStatus.INDISPONIVEL, savedBook.getStatus());
         verify(bookRepository, times(1)).save(any(Book.class));
@@ -85,7 +82,6 @@ class BookServiceTest {
     @Test
     @DisplayName("Deve atualizar um livro com sucesso")
     void updateBook_Success() {
-        // Arrange
         Book bookDetails = new Book();
         bookDetails.setTitle("As Duas Torres");
         bookDetails.setAvailableQuantity(3);
@@ -93,10 +89,8 @@ class BookServiceTest {
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         when(bookRepository.save(any(Book.class))).thenReturn(book);
 
-        // Act
         Book updatedBook = bookService.updateBook(1L, bookDetails);
 
-        // Assert
         assertNotNull(updatedBook);
         assertEquals("As Duas Torres", updatedBook.getTitle());
         assertEquals(3, updatedBook.getAvailableQuantity());
@@ -108,7 +102,6 @@ class BookServiceTest {
     @Test
     @DisplayName("Deve atualizar o status para INDISPONIVEL quando a quantidade for zero")
     void updateBook_WithZeroQuantity_ShouldSetStatusToUnavailable() {
-        // Arrange
         Book bookDetails = new Book();
         bookDetails.setTitle("As Duas Torres");
         bookDetails.setAvailableQuantity(0);
@@ -116,10 +109,8 @@ class BookServiceTest {
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         when(bookRepository.save(any(Book.class))).thenReturn(book);
 
-        // Act
         Book updatedBook = bookService.updateBook(1L, bookDetails);
 
-        // Assert
         assertEquals(BookStatus.INDISPONIVEL, updatedBook.getStatus());
         verify(bookRepository, times(1)).save(book);
     }
@@ -127,10 +118,8 @@ class BookServiceTest {
     @Test
     @DisplayName("Deve lançar exceção ao tentar atualizar um livro que não existe")
     void updateBook_WhenBookNotFound_ShouldThrowException() {
-        // Arrange
         when(bookRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> {
             bookService.updateBook(99L, new Book());
         });
@@ -140,42 +129,33 @@ class BookServiceTest {
     @Test
     @DisplayName("Deve deletar um livro com sucesso")
     void deleteBook_Success() {
-        // Arrange
         when(bookRepository.existsById(1L)).thenReturn(true);
         doNothing().when(bookRepository).deleteById(1L);
 
-        // Act
         bookService.deleteBook(1L);
 
-        // Assert
         verify(bookRepository, times(1)).deleteById(1L);
     }
 
     @Test
     @DisplayName("Deve lançar exceção ao tentar deletar um livro que não existe")
     void deleteBook_WhenBookNotFound_ShouldThrowException() {
-        // Arrange
         when(bookRepository.existsById(99L)).thenReturn(false);
 
-        // Act & Assert: Verifique se a exceção correta é lançada
         assertThrows(ResourceNotFoundException.class, () -> {
             bookService.deleteBook(99L);
         });
 
-        // Verify: Garanta que o método de deleção nunca foi chamado
         verify(bookRepository, never()).deleteById(anyLong());
     }
 
     @Test
     @DisplayName("Deve retornar uma lista de livros")
     void findAllBooks_ShouldReturnListOfBooks() {
-        // Arrange
         when(bookRepository.findAll()).thenReturn(List.of(book));
 
-        // Act
         List<Book> result = bookService.findAllBooks();
 
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("O Senhor dos Anéis", result.get(0).getTitle());

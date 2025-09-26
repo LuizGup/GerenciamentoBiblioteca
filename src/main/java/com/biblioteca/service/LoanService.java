@@ -59,7 +59,7 @@ public class LoanService {
         newLoan.setExpectedReturnDate(LocalDate.now().plusDays(LOAN_PERIOD_DAYS));
         newLoan.setStatus(LoanStatus.ATIVO);
 
-        Loan savedLoan = loanRepository.save(newLoan); // Salva primeiro
+        Loan savedLoan = loanRepository.save(newLoan);
 
         return convertToResponseDTO(savedLoan);
     }
@@ -102,18 +102,18 @@ public class LoanService {
             throw new ResourceNotFoundException("Usuário não encontrado com ID: " + userId);
         }
         return loanRepository.findByUserId(userId)
-                .stream() // Converte a lista para uma stream
-                .map(this::convertToResponseDTO) // Aplica a conversão para cada empréstimo
-                .collect(Collectors.toList()); // Coleta em uma nova lista de DTOs
+                .stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
 
     private LoanResponseDTO convertToResponseDTO(Loan loan) {
         LoanResponseDTO dto = new LoanResponseDTO();
         dto.setId(loan.getId());
         dto.setBookId(loan.getBook().getId());
-        dto.setBookTitle(loan.getBook().getTitle()); // Expondo apenas o necessário
+        dto.setBookTitle(loan.getBook().getTitle());
         dto.setUserId(loan.getUser().getId());
-        dto.setUserName(loan.getUser().getName()); // Expondo apenas o necessário
+        dto.setUserName(loan.getUser().getName());
         dto.setLoanDate(loan.getLoanDate());
         dto.setExpectedReturnDate(loan.getExpectedReturnDate());
         dto.setStatus(loan.getStatus());

@@ -42,6 +42,6 @@ public class Users {
     @PrePersist
     protected void onCreate() {
         registerDate = LocalDate.now();
-        status = UserStatus.ATIVO; // Define um status padrão
+        status = UserStatus.ATIVO;
     }
 }

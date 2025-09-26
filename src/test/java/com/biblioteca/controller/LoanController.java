@@ -40,27 +40,23 @@ class LoanControllerTest {
     @Test
     @DisplayName("Deve criar um empréstimo e retornar status 201 com o DTO de resposta")
     void createLoan_WithValidData_ShouldReturnCreated() throws Exception {
-        // Arrange
         LoanRequestDTO requestDTO = new LoanRequestDTO();
         requestDTO.setUserId(1L);
         requestDTO.setBookId(1L);
 
-        // Crie o DTO que você espera que o serviço retorne
         LoanResponseDTO responseDTO = new LoanResponseDTO();
         responseDTO.setId(1L);
         responseDTO.setStatus(LoanStatus.ATIVO);
-        responseDTO.setUserName("Carlos Santana"); // Adicione os dados que você quer verificar
+        responseDTO.setUserName("Carlos Santana");
 
-        // O mock agora retorna o LoanResponseDTO
         given(loanService.createLoan(any(LoanRequestDTO.class))).willReturn(responseDTO);
 
-        // Act & Assert
         mockMvc.perform(post("/api/loans")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("ATIVO"))
-                .andExpect(jsonPath("$.userName").value("Carlos Santana")); // Verifique um campo do DTO
+                .andExpect(jsonPath("$.userName").value("Carlos Santana"));
     }
 
     @Test
